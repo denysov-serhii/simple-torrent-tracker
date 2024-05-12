@@ -5,6 +5,7 @@ import static org.desktop2.transport.simpletorrettracker.SneakyThrowsFactory.sne
 import com.turn.ttorrent.client.Client;
 import com.turn.ttorrent.client.SharedTorrent;
 import com.turn.ttorrent.common.Torrent;
+import com.turn.ttorrent.tracker.TrackedTorrent;
 import com.turn.ttorrent.tracker.Tracker;
 import io.methvin.watcher.DirectoryChangeEvent;
 import io.methvin.watcher.DirectoryWatcher;
@@ -15,6 +16,8 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import lombok.val;
 
 public class DirectoryAwareTracker extends Tracker {
@@ -68,13 +71,27 @@ public class DirectoryAwareTracker extends Tracker {
       torrent.save(fos);
       fos.close();
 
-      System.out.println(STR."Torrent file should be created: \{torrentFile.getPath()}");
+      val server = new Tracker(address);
+      server.announce(TrackedTorrent.load(torrentFile));
 
-      // Start seeding
-      SharedTorrent sharedTorrent =
-          SharedTorrent.fromFile(torrentFile, new File(pathForTorrentFiles.toString()));
-      Client seeder = new Client(address.getAddress(), sharedTorrent);
-      seeder.share();
+      TimeUnit.SECONDS.sleep(5);
+
+      System.out.println(STR."====== Torrent file should be created: \{torrentFile.getPath()}");
+      System.out.println(
+          STR."====== Torrent file should be in folder: \{pathForTorrentFiles.toString()}");
+
+      System.out.println("START SEEDING file  ...");
+
+      CompletableFuture.runAsync(
+          sneakyThrows(
+              () -> {
+                TimeUnit.SECONDS.sleep(5);
+                SharedTorrent sharedTorrent =
+                    SharedTorrent.fromFile(torrentFile, new File(pathForTorrentFiles.toString()));
+                Client seeder = new Client(address.getAddress(), sharedTorrent);
+                seeder.share();
+              }));
+
     } catch (Exception e) {
       System.err.println(STR."ERROR: \{e.getMessage()}");
       // Handle exception

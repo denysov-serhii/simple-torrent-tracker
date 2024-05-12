@@ -24,11 +24,25 @@ public class SneakyThrowsFactory {
     };
   }
 
+  public static Runnable sneakyThrows(ThrowableRunnable runnable) {
+    return () -> {
+      try {
+        runnable.apply();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    };
+  }
+
   interface ThrowableFunction<T, R> {
     R apply(T t) throws Exception;
   }
 
   interface ThrowableConsumer<T> {
     void apply(T t) throws Exception;
+  }
+
+  interface ThrowableRunnable {
+    void apply() throws Exception;
   }
 }
