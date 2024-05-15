@@ -22,9 +22,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PAT }}
 
+      - name: Build with Maven
+        run: mvn clean package
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
-          tags: gaydar27/simple-torrent-tracker:${{ steps.extract_version.outputs.VERSION }}
+          tags: gaydara27/simple-torrent-tracker:${{ steps.extract_version.outputs.VERSION }}
