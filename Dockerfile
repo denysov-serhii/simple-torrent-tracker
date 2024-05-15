@@ -1,4 +1,4 @@
-FROM openjdk:21-jdk-alpine
+FROM openjdk:21-jdk
 
 ARG JAR_FILE=target/simple-torrent-tracker-1.0.0-SNAPSHOT-jar-with-dependencies.jar
 
