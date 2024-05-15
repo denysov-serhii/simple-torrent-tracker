@@ -16,7 +16,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.val;
 
@@ -73,8 +72,9 @@ public class DirectoryAwareTracker extends Tracker {
 
       val server = new Tracker(address);
       server.announce(TrackedTorrent.load(torrentFile));
+      server.start();
 
-      TimeUnit.SECONDS.sleep(5);
+      TimeUnit.SECONDS.sleep(2);
 
       System.out.println(STR."====== Torrent file should be created: \{torrentFile.getPath()}");
       System.out.println(
@@ -82,15 +82,11 @@ public class DirectoryAwareTracker extends Tracker {
 
       System.out.println("START SEEDING file  ...");
 
-      CompletableFuture.runAsync(
-          sneakyThrows(
-              () -> {
-                TimeUnit.SECONDS.sleep(5);
-                SharedTorrent sharedTorrent =
-                    SharedTorrent.fromFile(torrentFile, new File(pathForTorrentFiles.toString()));
-                Client seeder = new Client(address.getAddress(), sharedTorrent);
-                seeder.share();
-              }));
+      SharedTorrent sharedTorrent =
+          SharedTorrent.fromFile(torrentFile, new File(pathForTorrentFiles.toString()));
+      Client seeder = new Client(address.getAddress(), sharedTorrent);
+      System.out.println("====== Client starting sharing ...");
+      seeder.share();
 
     } catch (Exception e) {
       System.err.println(STR."ERROR: \{e.getMessage()}");
