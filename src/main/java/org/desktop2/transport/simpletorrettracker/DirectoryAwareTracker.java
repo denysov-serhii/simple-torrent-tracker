@@ -78,7 +78,8 @@ public class DirectoryAwareTracker extends Tracker {
       System.out.println(STR."FILE SHOULD BE SAVED into this path: \{torrentPath}");
 
       val torrentFile = new File(torrentPath);
-      String announceUrl = STR."http://\{address.getAddress().getHostAddress()}:\{address.getPort()}/announce";
+      String announceUrl =
+          STR."http://\{address.getAddress().getHostAddress()}:\{address.getPort()}/announce";
 
       System.out.println(STR."====== Announce url: \{announceUrl}");
       val torrent = Torrent.create(newFile, new URI(announceUrl), "Simple Torrent Tracker");

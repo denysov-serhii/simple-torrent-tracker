@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import lombok.SneakyThrows;
 import lombok.val;
@@ -21,7 +22,9 @@ public class Application {
   @SneakyThrows
   public static void main(String[] args) {
     if (args.length != 2 && args.length != 3) {
-      System.out.println("Wrong numbers of arguments.");
+      System.out.println(
+          STR."Wrong numbers of arguments. Expected 2 or 3, but this given: \{
+              Arrays.toString(args)}");
       System.exit(0);
     }
 
