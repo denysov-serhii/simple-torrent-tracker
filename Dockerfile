@@ -7,4 +7,4 @@ ADD ${JAR_FILE} app.jar
 ENV JAVA_OPTS="--enable-preview"
 
 # Run the jar file 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app.jar $APP_ARGS"]
