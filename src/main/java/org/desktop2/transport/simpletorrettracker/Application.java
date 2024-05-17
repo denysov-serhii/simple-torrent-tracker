@@ -2,6 +2,7 @@ package org.desktop2.transport.simpletorrettracker;
 
 import static java.lang.StringTemplate.STR;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -55,11 +56,10 @@ public class Application {
       }
     }
 
-    val hostname = System.getenv("HOSTNAME");
     val portAsString = System.getenv("PORT");
 
-    if (hostname == null || portAsString == null) {
-      System.out.println("HOSTNAME or/and PORT are not defined in environment");
+    if (portAsString == null) {
+      System.out.println("PORT is not defined in environment");
       System.exit(0);
     }
 
@@ -70,10 +70,11 @@ public class Application {
 
     int port = Integer.parseInt(portAsString);
 
-    DirectoryAwareTracker tracker =
-        new DirectoryAwareTracker(new InetSocketAddress(hostname, port), directoryToWatch);
+    InetAddress inetAddress = InetAddress.getLocalHost();
 
-    // Start watching the directory for new .torrent files
+    DirectoryAwareTracker tracker =
+        new DirectoryAwareTracker(new InetSocketAddress(inetAddress.getHostAddress(), port), directoryToWatch);
+
     tracker.watch();
 
     // Add shutdown hook to stop watching when the application exits
