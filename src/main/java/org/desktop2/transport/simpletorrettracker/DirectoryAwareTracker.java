@@ -25,16 +25,16 @@ import org.slf4j.LoggerFactory;
 
 public class DirectoryAwareTracker extends Tracker {
   private final DirectoryWatcher watcher;
-  private final Path pathForTorrentFiles;
+  private final Path folderToSaveTorrentFiles;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryAwareTracker.class);
 
-  DirectoryAwareTracker(InetSocketAddress address, Path directoryToWatch) throws IOException {
+  DirectoryAwareTracker(InetSocketAddress address, Path directoryToWatch, Path folderToSaveTorrentFiles) throws IOException {
     super(address);
 
-    pathForTorrentFiles = Files.createTempDirectory("torrent-testing-");
+    this.folderToSaveTorrentFiles = folderToSaveTorrentFiles;
 
-    LOGGER.info(pathForTorrentFiles + " path is used to store .torrent files");
+    LOGGER.info(folderToSaveTorrentFiles + " path is used to store .torrent files");
 
     val filesToSeed = new ArrayList<File>();
 
@@ -76,7 +76,7 @@ public class DirectoryAwareTracker extends Tracker {
     File newFile = new File(newFilePath.toString());
     try {
       String torrentPath =
-          STR."\{pathForTorrentFiles.toString()}\{File.separator}\{newFile.getName()}.torrent";
+          STR."\{folderToSaveTorrentFiles.toString()}\{File.separator}\{newFile.getName()}.torrent";
 
       LOGGER.info(STR."FILE SHOULD BE SAVED into this path: \{torrentPath}");
 
@@ -95,7 +95,7 @@ public class DirectoryAwareTracker extends Tracker {
 
       LOGGER.info(STR."====== Torrent file should be created: \{torrentFile.getPath()}");
       LOGGER.info(
-          STR."====== Torrent file should be in folder: \{pathForTorrentFiles.toString()}");
+          STR."====== Torrent file should be in folder: \{folderToSaveTorrentFiles.toString()}");
 
       return Optional.of(torrentFile);
 
@@ -110,11 +110,11 @@ public class DirectoryAwareTracker extends Tracker {
   public void stopWatching() {
     try {
       watcher.close();
-      Files.walk(pathForTorrentFiles)
+      Files.walk(folderToSaveTorrentFiles)
           .peek(path -> LOGGER.info(STR."Deleting \{path.toString()}"))
           .forEach(sneakyThrows(Files::delete));
 
-      Files.delete(pathForTorrentFiles);
+      Files.delete(folderToSaveTorrentFiles);
     } catch (Exception e) {
       // Handle exception
     }

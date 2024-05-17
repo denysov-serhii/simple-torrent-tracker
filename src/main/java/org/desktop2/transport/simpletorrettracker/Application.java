@@ -39,20 +39,27 @@ public class Application {
 
     Path directoryToWatch = Paths.get(downloadsFolderPath);
     if (!Files.exists(directoryToWatch)) {
-      System.out.println(STR."Torrent file with given name(\{downloadsFolderPath}) does not exist");
+      System.out.println(STR."Folder with given name(\{downloadsFolderPath}) does not exist");
+      System.exit(0);
+    }
+
+    val folderToSaveTorrentFiles = Paths.get(args[2]);
+
+    if (!Files.exists(folderToSaveTorrentFiles)) {
+      System.out.println(STR."Folder with given name(\{folderToSaveTorrentFiles}) does not exist");
       System.exit(0);
     }
 
     String announceUrl = null;
 
     if (role.equalsIgnoreCase("SEEDER")) {
-      if (args.length != 3) {
+      if (args.length != 4) {
         System.out.println("Please provide link to torrent tracker announcement");
         System.exit(0);
       }
 
-      if (isValidURL(args[2]) && isUrlReachable(args[2])) {
-        announceUrl = args[2];
+      if (isValidURL(args[3]) && isUrlReachable(args[3])) {
+        announceUrl = args[3];
       } else {
         System.out.println("torrent tracker announcement is correct or reachable");
         System.exit(0);
@@ -77,7 +84,7 @@ public class Application {
 
     DirectoryAwareTracker tracker =
         new DirectoryAwareTracker(
-            new InetSocketAddress(inetAddress.getHostAddress(), port), directoryToWatch);
+            new InetSocketAddress(inetAddress.getHostAddress(), port), directoryToWatch, folderToSaveTorrentFiles);
 
     tracker.watch();
 
