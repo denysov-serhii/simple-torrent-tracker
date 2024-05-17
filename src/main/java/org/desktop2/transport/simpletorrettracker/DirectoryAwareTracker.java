@@ -18,19 +18,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+
 import lombok.val;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DirectoryAwareTracker extends Tracker {
   private final DirectoryWatcher watcher;
   private final Path pathForTorrentFiles;
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryAwareTracker.class);
 
   DirectoryAwareTracker(InetSocketAddress address, Path directoryToWatch) throws IOException {
     super(address);
 
     pathForTorrentFiles = Files.createTempDirectory("torrent-testing-");
 
-    System.out.println(pathForTorrentFiles + " path is used to store .torrent files");
+    LOGGER.info(pathForTorrentFiles + " path is used to store .torrent files");
 
     val filesToSeed = new ArrayList<File>();
 
@@ -49,7 +53,7 @@ public class DirectoryAwareTracker extends Tracker {
             f -> {
               SharedTorrent sharedTorrent = SharedTorrent.fromFile(f, directoryToWatch.toFile());
               Client seeder = new Client(address.getAddress(), sharedTorrent);
-              System.out.println("====== Client starting sharing ...");
+              LOGGER.info("====== Client starting sharing ...");
               seeder.share();
             }));
 
@@ -68,19 +72,19 @@ public class DirectoryAwareTracker extends Tracker {
   }
 
   private Optional<File> startTrackingFile(InetSocketAddress address, Path newFilePath) {
-    System.out.println(STR."New file added to tracking \{newFilePath}");
+    LOGGER.info(STR."New file added to tracking \{newFilePath}");
     File newFile = new File(newFilePath.toString());
     try {
       String torrentPath =
           STR."\{pathForTorrentFiles.toString()}\{File.separator}\{newFile.getName()}.torrent";
 
-      System.out.println(STR."FILE SHOULD BE SAVED into this path: \{torrentPath}");
+      LOGGER.info(STR."FILE SHOULD BE SAVED into this path: \{torrentPath}");
 
       val torrentFile = new File(torrentPath);
       String announceUrl =
           STR."http://\{address.getAddress().getHostAddress()}:\{address.getPort()}/announce";
 
-      System.out.println(STR."====== Announce url: \{announceUrl}");
+      LOGGER.info(STR."====== Announce url: \{announceUrl}");
       val torrent = Torrent.create(newFile, new URI(announceUrl), "Simple Torrent Tracker");
       FileOutputStream fos = new FileOutputStream(torrentFile);
       torrent.save(fos);
@@ -88,18 +92,15 @@ public class DirectoryAwareTracker extends Tracker {
 
       announce(TrackedTorrent.load(torrentFile));
 
-      TimeUnit.SECONDS.sleep(2);
 
-      System.out.println(STR."====== Torrent file should be created: \{torrentFile.getPath()}");
-      System.out.println(
+      LOGGER.info(STR."====== Torrent file should be created: \{torrentFile.getPath()}");
+      LOGGER.info(
           STR."====== Torrent file should be in folder: \{pathForTorrentFiles.toString()}");
-
-      System.out.println("START SEEDING file  ...");
 
       return Optional.of(torrentFile);
 
     } catch (Exception e) {
-      System.err.println(STR."ERROR: \{e.getMessage()}");
+      LOGGER.info(STR."ERROR: \{e.getMessage()}");
       // Handle exception
     }
 
@@ -110,7 +111,7 @@ public class DirectoryAwareTracker extends Tracker {
     try {
       watcher.close();
       Files.walk(pathForTorrentFiles)
-          .peek(path -> System.out.println(STR."Deleting \{path.toString()}"))
+          .peek(path -> LOGGER.info(STR."Deleting \{path.toString()}"))
           .forEach(sneakyThrows(Files::delete));
 
       Files.delete(pathForTorrentFiles);
