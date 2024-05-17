@@ -12,7 +12,6 @@ import io.methvin.watcher.DirectoryWatcher;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.file.Files;
@@ -49,7 +48,7 @@ public class DirectoryAwareTracker extends Tracker {
         sneakyThrows(
             f -> {
               SharedTorrent sharedTorrent = SharedTorrent.fromFile(f, directoryToWatch.toFile());
-              Client seeder = new Client(InetAddress.getLocalHost(), sharedTorrent);
+              Client seeder = new Client(address.getAddress(), sharedTorrent);
               System.out.println("====== Client starting sharing ...");
               seeder.share();
             }));
