@@ -73,7 +73,8 @@ public class Application {
     InetAddress inetAddress = InetAddress.getLocalHost();
 
     DirectoryAwareTracker tracker =
-        new DirectoryAwareTracker(new InetSocketAddress(inetAddress.getHostAddress(), port), directoryToWatch);
+        new DirectoryAwareTracker(
+            new InetSocketAddress(inetAddress.getHostAddress(), port), directoryToWatch);
 
     tracker.watch();
 
